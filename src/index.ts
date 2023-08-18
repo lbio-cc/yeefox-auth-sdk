@@ -17,7 +17,7 @@ export class YeefoxAuthSdk{
 	public promise: WrapPromise<string> | undefined;
 	private readonly html: YeefoxAuthIframe;
 	private readonly ready: WrapPromise<string>;
-	private appId: string | undefined;
+	public readonly appId: string | undefined;
 	static instance(appId?:string){
 		if(!yeefoxAuthSdkInstance){
 			yeefoxAuthSdkInstance = new YeefoxAuthSdk(appId);
@@ -33,11 +33,27 @@ export class YeefoxAuthSdk{
 	static get VERSION(){
 		return '1.0.0';
 	}
+
+	async grantAssetView(options: YEEFOX_AUTH.AuthEventData.AssetView["data"], commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon) {
+		if (this.promise) {
+			throw new Error('当前有授权在进行中')
+		}
+
+		await this.html.show();
+		await this.ready;
+
+		this.promise = new WrapPromise<string>();
+		this.sendMessage(YEEFOX_AUTH.AuthEvent.ASSET_VIEW, {
+			data: options,
+			custom: commonOption?.custom,
+			sign: commonOption?.sign,
+			appId: this.appId
+		});
+
+		return this.promise as Promise<string>;
+	}
 	
-	async grantUserInfo(options: YEEFOX_AUTH.AuthEventData.UserInfo["data"], commonOption?:{
-		custom?: string,
-		sign?: string,
-	}){
+	async grantUserInfo(options: YEEFOX_AUTH.AuthEventData.UserInfo["data"], commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon){
 		if(options.fields.indexOf(UserInfoField.WALLET) !== -1){
 			if(!options.chain){
 				throw new Error('请选择链地址所在的区块链');
@@ -58,7 +74,26 @@ export class YeefoxAuthSdk{
 			appId: this.appId
 		});
 		
-		return this.promise;
+		return this.promise as Promise<string>;
+	}
+	
+	async grantAssetHosting(options: YEEFOX_AUTH.AuthEventData.AssetHosting["data"], commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon){
+		if (this.promise) {
+			throw new Error('当前有授权在进行中')
+		}
+		
+		await this.html.show();
+		await this.ready;
+
+		this.promise = new WrapPromise<string>();
+		this.sendMessage(YEEFOX_AUTH.AuthEvent.ASSET_HOSTING, {
+			data: options,
+			custom: commonOption?.custom,
+			sign: commonOption?.sign,
+			appId: this.appId
+		});
+
+		return this.promise as Promise<string>;
 	}
 
 	eventHandler<T extends SerialEvent>(eventType: T, data: YEEFOX_AUTH.SerialEventDataType<T> ){
@@ -92,7 +127,7 @@ export class YeefoxAuthSdk{
 export class YeefoxAuthIframe{
 	private readonly container: HTMLDivElement;
 	private readonly iframe: HTMLIFrameElement;
-	private readonly visited: boolean;
+	private visited: boolean;
 	private origin: string|undefined;
 	private readonly eventHandler: (eventType: SerialEvent, data: any) => Promise<void> | void
 
@@ -112,23 +147,26 @@ export class YeefoxAuthIframe{
 	
 	async show(){
 		if(!this.visited){
-			window.addEventListener('message', (e:MessageEvent)=>{
-				if (typeof e.data === "object" && e.data) {
-					if (typeof e.data.type === "string" && e.data.type.indexOf(YEEFOX_AUTH_SIGNATURE) === 0) {
-						let type = e.data.type.substring(YEEFOX_AUTH_SIGNATURE.length);
-
-						if(type === SerialEvent.READY){
-							this.origin = e.data.data.data;
-						}
-						
-						this.eventHandler(type, e.data.data);
-					}
-				}
-			})
+			window.addEventListener('message', (e)=>this.messageHandler(e))
 			this.iframe.src = `${YEEFOX_ORIGIN}/#/pages/auth/iframe`;
+			this.visited = true;
 		}
 		
 		this.container.classList.add('open');
+	}
+	
+	messageHandler(e: MessageEvent){
+		if (typeof e.data === "object" && e.data) {
+			if (typeof e.data.type === "string" && e.data.type.indexOf(YEEFOX_AUTH_SIGNATURE) === 0) {
+				let type = e.data.type.substring(YEEFOX_AUTH_SIGNATURE.length);
+
+				if (type === SerialEvent.READY) {
+					this.origin = e.data.data.data;
+				}
+
+				this.eventHandler(type, e.data.data);
+			}
+		}
 	}
 	
 	sendMessage<T extends AuthEvent>(eventType: T, data: any){

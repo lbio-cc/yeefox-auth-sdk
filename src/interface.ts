@@ -1,72 +1,101 @@
-export namespace YEEFOX_AUTH{
+export namespace YEEFOX_AUTH {
 	export enum UserInfoField {
 		CODE = 'code',
 		WALLET = 'wallet',
-		REAL_NAME = 'realName',
+		NICK_NAME = 'nickName',
 		PHONE = 'phone',
-		ID_CARD = 'idCard',
 	}
 
-	export interface GrantUserInfoOptions {
-		chain?: string,
-	}
-	
 	export enum AuthEvent {
 		USER_INFO = 'USER_INFO',
-		TRANSFER = 'TRANSFER',
-		GRANT_ASSET = 'GRANT_ASSET',
+		ASSET_HOSTING = 'ASSET_HOSTING',
+		ASSET_TRANSFER = 'ASSET_TRANSFER',
+		ASSET_VIEW = 'ASSET_VIEW',
 		SIGN = 'SIGN',
 		READY = 'READY',
 	}
-	
+
 	export namespace AuthEventData {
 		export interface Ready {
-			data:string,
+			data: string,
 		}
+
+		export interface UserCommon{
+			custom?: string,
+			sign?: string,
+		}	
 		
-		export interface Common{
-			custom?:string,
-			appId?:string,
-			sign?:string,
-			data:any,
+		export interface Common extends UserCommon{
+			appId?: string,
+			data: any,
 		}
-		
-		export interface UserInfo extends Common{
+
+		export interface UserInfo extends Common {
 			data: {
 				fields: UserInfoField[],
 				chain?: string,
 			}
 		}
+
+		export interface AssetView extends Common {
+			data: {
+				chains?: string[],
+			}
+		}
+
+		export interface AssetHosting extends Common {
+			data: {
+				chain: string,
+				class_id: string,
+				token_id: string,
+				type: 721 | 1155 | 137,
+				amount: number,
+			}
+		}
+
+		export interface AssetTransfer extends Common {
+			data: {
+				chain: string,
+				class_id: string,
+				token_id: string,
+				type: 721 | 1155 | 137,
+				amount: number,
+				recipient: string,
+			}
+		}
 	}
 
-	export type AuthEventDataType<T extends AuthEvent> = 
-			T extends AuthEvent.READY ? AuthEventData.Ready :
+	export type AuthEventDataType<T extends AuthEvent> =
+		T extends AuthEvent.READY ? AuthEventData.Ready :
 			T extends AuthEvent.USER_INFO ? AuthEventData.UserInfo :
-			never;
+				T extends AuthEvent.ASSET_VIEW ? AuthEventData.AssetView :
+					T extends AuthEvent.ASSET_HOSTING ? AuthEventData.AssetHosting :
+						T extends AuthEvent.ASSET_TRANSFER ? AuthEventData.AssetTransfer :
+							never;
 
 	export enum SerialEvent {
 		READY = 'READY',
 		APPROVE = 'APPROVE',
 		REJECT = 'REJECT',
 	}
-	
-	namespace SerialEventData{
-        export interface Ready {
-            data: string,
-        }
-        
-        export interface Approve{
-            serial:string,
-        }
-        
-        export interface Reject{
-            reason?:string,
-        }
+
+	namespace SerialEventData {
+		export interface Ready {
+			data: string,
+		}
+
+		export interface Approve {
+			serial: string,
+		}
+
+		export interface Reject {
+			reason?: string,
+		}
 	}
 
-	export type SerialEventDataType<T extends SerialEvent> = 
-        T extends SerialEvent.READY ? SerialEventData.Ready :
-        T extends SerialEvent.APPROVE ? SerialEventData.Approve :
-        T extends SerialEvent.REJECT ? SerialEventData.Reject :
-		never;
+	export type SerialEventDataType<T extends SerialEvent> =
+		T extends SerialEvent.READY ? SerialEventData.Ready :
+			T extends SerialEvent.APPROVE ? SerialEventData.Approve :
+				T extends SerialEvent.REJECT ? SerialEventData.Reject :
+					never;
 }
