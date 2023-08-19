@@ -8,7 +8,7 @@ import SerialEvent = YEEFOX_AUTH.SerialEvent;
 
 import './scss/style.scss';
 
-const YEEFOX_ORIGIN = 'http://localhost:8809'
+const YEEFOX_ORIGIN = 'https://h5.yeefox.cc';
 
 const YEEFOX_AUTH_SIGNATURE = 'YEEFOX:OPEN_AUTH:';
 
@@ -96,7 +96,7 @@ export class YeefoxAuthSdk{
 		return this.promise as Promise<string>;
 	}
 
-	eventHandler<T extends SerialEvent>(eventType: T, data: YEEFOX_AUTH.SerialEventDataType<T> ){
+	private eventHandler<T extends SerialEvent>(eventType: T, data: YEEFOX_AUTH.SerialEventDataType<T> ){
 		switch (eventType){
 			case SerialEvent.READY:
 				this.sendMessage(AuthEvent.READY, { data: window.location.origin });
@@ -119,12 +119,12 @@ export class YeefoxAuthSdk{
 		}
 	}
 
-	sendMessage<T extends AuthEvent>(eventType: T, data: YEEFOX_AUTH.AuthEventDataType<T>) {
+	private sendMessage<T extends AuthEvent>(eventType: T, data: YEEFOX_AUTH.AuthEventDataType<T>) {
 		this.html.sendMessage(eventType, data);
 	}
 }
 
-export class YeefoxAuthIframe{
+class YeefoxAuthIframe{
 	private readonly container: HTMLDivElement;
 	private readonly iframe: HTMLIFrameElement;
 	private visited: boolean;
