@@ -39,9 +39,10 @@
     "sass": "^1.65.1",
     "ts-jest": "^29.1.1",
     "tslib": "^2.6.1",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "rollup-plugin-exclude-dependencies-from-bundle": "^1.1.23"
   },
   "dependencies": {
-    "rollup-plugin-exclude-dependencies-from-bundle": "^1.1.23"
+    
   }
 }
