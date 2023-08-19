@@ -15,6 +15,28 @@ export namespace YEEFOX_AUTH {
 		READY = 'READY',
 	}
 
+	export namespace AuthMethodData{
+		export interface UserInfo {
+			fields: UserInfoField[],
+			chain?: string,
+		}
+		export interface AssetView {
+			chains?: string[],
+		}
+
+		export interface AssetHosting {
+			chain: string,
+			class_id: string,
+			token_id: string,
+			type: 721 | 1155 | 137,
+			amount: number,
+		}
+		
+		export interface AssetTransfer extends AssetHosting{
+			recipient: string,
+		}
+	}
+	
 	export namespace AuthEventData {
 		export interface Ready {
 			data: string,
@@ -31,37 +53,19 @@ export namespace YEEFOX_AUTH {
 		}
 
 		export interface UserInfo extends Common {
-			data: {
-				fields: UserInfoField[],
-				chain?: string,
-			}
+			data: AuthMethodData.UserInfo
 		}
 
 		export interface AssetView extends Common {
-			data: {
-				chains?: string[],
-			}
+			data: AuthMethodData.AssetView
 		}
 
 		export interface AssetHosting extends Common {
-			data: {
-				chain: string,
-				class_id: string,
-				token_id: string,
-				type: 721 | 1155 | 137,
-				amount: number,
-			}
+			data: AuthMethodData.AssetHosting
 		}
 
 		export interface AssetTransfer extends Common {
-			data: {
-				chain: string,
-				class_id: string,
-				token_id: string,
-				type: 721 | 1155 | 137,
-				amount: number,
-				recipient: string,
-			}
+			data: AuthMethodData.AssetTransfer
 		}
 	}
 

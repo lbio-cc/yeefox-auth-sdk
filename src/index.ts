@@ -34,7 +34,7 @@ export class YeefoxAuthSdk{
 		return '1.0.0';
 	}
 
-	async grantAssetView(options: YEEFOX_AUTH.AuthEventData.AssetView["data"], commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon) {
+	async grantAssetView(options: YEEFOX_AUTH.AuthMethodData.AssetView, commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon) {
 		if (this.promise) {
 			throw new Error('当前有授权在进行中')
 		}
@@ -53,7 +53,7 @@ export class YeefoxAuthSdk{
 		return this.promise as Promise<string>;
 	}
 	
-	async grantUserInfo(options: YEEFOX_AUTH.AuthEventData.UserInfo["data"], commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon){
+	async grantUserInfo(options: YEEFOX_AUTH.AuthMethodData.UserInfo, commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon){
 		if(options.fields.indexOf(UserInfoField.WALLET) !== -1){
 			if(!options.chain){
 				throw new Error('请选择链地址所在的区块链');
@@ -77,7 +77,7 @@ export class YeefoxAuthSdk{
 		return this.promise as Promise<string>;
 	}
 	
-	async grantAssetHosting(options: YEEFOX_AUTH.AuthEventData.AssetHosting["data"], commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon){
+	async grantAssetHosting(options: YEEFOX_AUTH.AuthMethodData.AssetHosting, commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon){
 		if (this.promise) {
 			throw new Error('当前有授权在进行中')
 		}
