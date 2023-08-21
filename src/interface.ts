@@ -19,6 +19,7 @@ export namespace YEEFOX_AUTH {
 		export interface UserInfo {
 			fields: UserInfoField[],
 			chain?: string,
+			walletType?: '0x' | 'iaa'
 		}
 		export interface AssetView {
 			chains?: string[],

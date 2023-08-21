@@ -31,7 +31,7 @@ export class YeefoxAuthSdk{
 		this.ready = new WrapPromise<string>();
 	}
 	static get VERSION(){
-		return '1.1.0';
+		return '1.2.0';
 	}
 
 	async grantAssetView(options: YEEFOX_AUTH.AuthMethodData.AssetView, commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon) {
