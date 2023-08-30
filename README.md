@@ -29,7 +29,7 @@ import {YEEFOX_AUTH, YeefoxAuthSdk} from "@yeefox/auth-sdk";
 <script type="text/javascript" src="node_modules/@yeefox/auth-sdk/lib/index.umd.js"></script>
 <script type="text/javascript">
     const appId="xxx";
-	const yeefoxAuth = window.YeefoxAuthSdk.YeefoxAuthSdk.instance(appId);
+	const yeefoxAuth = window.YEEFOX.YeefoxAuthSdk.instance(appId);
 </script>
 ```
 
@@ -50,40 +50,40 @@ import {YEEFOX_AUTH, YeefoxAuthSdk} from "@yeefox/auth-sdk";
 
 1. 申请授权用户信息接口(grantUserInfo)
 
-  `fields`参数包含
+   `fields`参数包含
 
-  | UserInfoField 代码 | 值(字符串) | 意义   |
-  | ------------------ |----------| ------ |
-  | CODE               | code     | 用户码 |
-  | WALLET             | wallet   | 链地址 |
-  | PHONE              | phone    | 手机号 |
-  | NICK_NAME          | nickName | 昵称   |
+   | UserInfoField 代码 | 值(字符串) | 意义   |
+   | ------------------ |----------| ------ |
+   | CODE               | code     | 用户码 |
+   | WALLET             | wallet   | 链地址 |
+   | PHONE              | phone    | 手机号 |
+   | NICK_NAME          | nickName | 昵称   |
 
-  `chain` 参数为以狐钱包链代码, 在fields中包含wallet时必填
+   `chain` 参数为以狐钱包链代码, 在fields中包含wallet时必填
 
-  `walletType` 参数在链为天舟链时可选, `0x`是EVM链地址格式, `iaa`是原生链地址格式
+   `walletType` 参数在链为天舟链时可选, `0x`是EVM链地址格式, `iaa`是原生链地址格式
 
 2. 申请授权用户资产列表查看接口(grantAssetView)
 
-  `chains`参数为以狐钱包链代码数组, 可选. 当填入时, 用户只能在选择的链中授权链地址
+   `chains`参数为以狐钱包链代码数组, 可选. 当填入时, 用户只能在选择的链中授权链地址
 
 3. 申请授权用户资产托管接口(grantAssetHosting)
 
-  `chain`参数为资产的以狐钱包链代码
+   `chain`参数为资产的以狐钱包链代码
 
-  `class_id`参数为资产的分类ID
+   `class_id`参数为资产的分类ID
 
-  `token_id`参数为资产的TokenID
+   `token_id`参数为资产的TokenID
 
-  `type`参数为资产类型
+   `type`参数为资产类型
 
-  | 值(数字) | 意义                    |
-  | -------- | ----------------------- |
-  | 137      | Web3域名                |
-  | 721      | NFT(Non-Fungible Token) |
-  | 1155     | MT(Multi-Token)         |
+   | 值(数字) | 意义                    |
+   | -------- | ----------------------- |
+   | 137      | Web3域名                |
+   | 721      | NFT(Non-Fungible Token) |
+   | 1155     | MT(Multi-Token)         |
 
-  `amount`参数为数量, 在137和721时恒定为1, 1155时为需要托管的数量
+   `amount`参数为数量, 在137和721时恒定为1, 1155时为需要托管的数量
 
 
 
@@ -92,9 +92,9 @@ import {YEEFOX_AUTH, YeefoxAuthSdk} from "@yeefox/auth-sdk";
 ```javascript
 try{
     const serial = await yeefoxAuth.grantUserInfo({
-		fields: [YEEFOX_AUTH.UserInfoField.CODE, YEEFOX_AUTH.UserInfoField.WALLET, YEEFOX_AUTH.UserInfoField.PHONE],
-		chain: "wenchang-tianzhou"
-	});
+        fields: [YEEFOX_AUTH.UserInfoField.CODE, YEEFOX_AUTH.UserInfoField.WALLET, YEEFOX_AUTH.UserInfoField.PHONE],
+        chain: "wenchang-tianzhou"
+    });
     console.log("授权成功, 凭证序列号",serial)
 }
 catch(e){

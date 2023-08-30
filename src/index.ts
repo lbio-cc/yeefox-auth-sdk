@@ -34,7 +34,7 @@ export class YeefoxAuthSdk{
 		this.checkDapp();
 	}
 	static get VERSION(){
-		return '1.3.0';
+		return '1.3.1';
 	}
 	
 	private checkDapp(){
