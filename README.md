@@ -1,5 +1,5 @@
 # @yeefox/auth-sdk
-以狐钱包授权SDK
+以狐钱包授权SDK (1.3.0)
 
 ## 安装
 
@@ -33,6 +33,8 @@ import {YEEFOX_AUTH, YeefoxAuthSdk} from "@yeefox/auth-sdk";
 </script>
 ```
 
+使用申请授权接口前, 初始化必须传入 appId, 使用DApp授权接口则不需要
+
 
 
 ## 调用方法
@@ -44,20 +46,9 @@ import {YEEFOX_AUTH, YeefoxAuthSdk} from "@yeefox/auth-sdk";
   const yeefoxAuth = YeefoxAuthSdk.instance(appId);
   ```
 
-- 申请授权用户信息接口(grantUserInfo)
+### 申请授权接口 (需要appId)
 
-  ```javascript
-  try{
-      const serial = await yeefoxAuth.grantUserInfo({
-  		fields: [YEEFOX_AUTH.UserInfoField.CODE, YEEFOX_AUTH.UserInfoField.WALLET, YEEFOX_AUTH.UserInfoField.PHONE],
-  		chain: "wenchang-tianzhou"
-  	});
-      console.log("授权成功, 凭证序列号",serial)
-  }
-  catch(e){
-      console.error("授权失败", e);
-  }
-  ```
+1. 申请授权用户信息接口(grantUserInfo)
 
   `fields`参数包含
 
@@ -72,11 +63,11 @@ import {YEEFOX_AUTH, YeefoxAuthSdk} from "@yeefox/auth-sdk";
 
   `walletType` 参数在链为天舟链时可选, `0x`是EVM链地址格式, `iaa`是原生链地址格式
 
-- 申请授权用户资产列表查看接口(grantAssetView)
+2. 申请授权用户资产列表查看接口(grantAssetView)
 
   `chains`参数为以狐钱包链代码数组, 可选. 当填入时, 用户只能在选择的链中授权链地址
 
-- 申请授权用户资产托管接口(grantAssetHosting)
+3. 申请授权用户资产托管接口(grantAssetHosting)
 
   `chain`参数为资产的以狐钱包链代码
 
@@ -98,7 +89,54 @@ import {YEEFOX_AUTH, YeefoxAuthSdk} from "@yeefox/auth-sdk";
 
 上面三个接口都会异步返回(Promise<string>)一个授权序列号, 将序列号交于后端以实际执行授权.
 
+```javascript
+try{
+    const serial = await yeefoxAuth.grantUserInfo({
+		fields: [YEEFOX_AUTH.UserInfoField.CODE, YEEFOX_AUTH.UserInfoField.WALLET, YEEFOX_AUTH.UserInfoField.PHONE],
+		chain: "wenchang-tianzhou"
+	});
+    console.log("授权成功, 凭证序列号",serial)
+}
+catch(e){
+    console.error("授权失败", e);
+}
+```
+
 如果授权发生错误(用户拒绝, 参数错误等) 会抛出错误.
+
+### DApp授权接口 (不需要appId)
+
+1. DApp授权用户信息
+
+   `fields`参数包含
+
+   | UserInfoField 代码 | 值(字符串) | 意义   |
+   | ------------------ | ---------- | ------ |
+   | CODE               | code       | 用户码 |
+   | WALLET             | wallet     | 链地址 |
+
+   `chain` 参数为以狐钱包链代码, 在fields中包含wallet时必填
+
+
+
+```javascript
+try {
+    const result = await yeefoxAuth.getUserInfo({
+        fields: [
+            YEEFOX_AUTH.UserInfoField.CODE,
+            YEEFOX_AUTH.UserInfoField.WALLET,
+        ],
+        chain: 'wenchang-tianzhou',
+    });
+
+    console.log("授权成功, 用户信息",result)
+}
+catch (e){
+    console.error("授权失败", e);
+}
+```
+
+
 
 
 

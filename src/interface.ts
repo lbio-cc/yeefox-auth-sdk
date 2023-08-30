@@ -1,4 +1,9 @@
 export namespace YEEFOX_AUTH {
+	export const enum Mode {
+		HTML = 'iframe',
+		DAPP = 'dapp',
+	}
+
 	export enum UserInfoField {
 		CODE = 'code',
 		WALLET = 'wallet',
@@ -15,12 +20,17 @@ export namespace YEEFOX_AUTH {
 		READY = 'READY',
 	}
 
-	export namespace AuthMethodData{
+	export enum DAppEvent {
+		USER_INFO = 'DAPP_USER_INFO',
+	}
+
+	export namespace AuthMethodData {
 		export interface UserInfo {
 			fields: UserInfoField[],
 			chain?: string,
 			walletType?: '0x' | 'iaa'
 		}
+
 		export interface AssetView {
 			chains?: string[],
 		}
@@ -32,23 +42,31 @@ export namespace YEEFOX_AUTH {
 			type: 721 | 1155 | 137,
 			amount: number,
 		}
-		
-		export interface AssetTransfer extends AssetHosting{
+
+		export interface AssetTransfer extends AssetHosting {
 			recipient: string,
 		}
 	}
-	
+
+	export namespace DAppMethodData {
+		export interface UserInfo {
+			fields: Exclude<UserInfoField, UserInfoField.PHONE>[],
+			chain?: string,
+			walletType?: '0x' | 'iaa'
+		}
+	}
+
 	export namespace AuthEventData {
 		export interface Ready {
 			data: string,
 		}
 
-		export interface UserCommon{
+		export interface UserCommon {
 			custom?: string,
 			sign?: string,
-		}	
-		
-		export interface Common extends UserCommon{
+		}
+
+		export interface Common extends UserCommon {
 			appId?: string,
 			data: any,
 		}
@@ -70,7 +88,13 @@ export namespace YEEFOX_AUTH {
 		}
 	}
 
-	export type AuthEventDataType<T extends AuthEvent> =
+	export namespace DAppEventData {
+		export interface UserInfo {
+			data: DAppMethodData.UserInfo
+		}
+	}
+
+	export type AuthEventDataType<T extends AuthEvent = AuthEvent> =
 		T extends AuthEvent.READY ? AuthEventData.Ready :
 			T extends AuthEvent.USER_INFO ? AuthEventData.UserInfo :
 				T extends AuthEvent.ASSET_VIEW ? AuthEventData.AssetView :
@@ -78,15 +102,20 @@ export namespace YEEFOX_AUTH {
 						T extends AuthEvent.ASSET_TRANSFER ? AuthEventData.AssetTransfer :
 							never;
 
-	export enum SerialEvent {
+	export type DAppEventDataType<T extends DAppEvent = DAppEvent> =
+		T extends DAppEvent.USER_INFO ? DAppEventData.UserInfo :
+			never;
+
+	export enum ServerEvent {
 		READY = 'READY',
 		APPROVE = 'APPROVE',
 		REJECT = 'REJECT',
+		USER_INFO = 'USER_INFO',
 	}
 
-	namespace SerialEventData {
+	export namespace ServerEventData {
 		export interface Ready {
-			data: string,
+			serial: number,
 		}
 
 		export interface Approve {
@@ -96,11 +125,17 @@ export namespace YEEFOX_AUTH {
 		export interface Reject {
 			reason?: string,
 		}
+		
+		export interface UserInfo {
+			code?:string,
+			wallet?:string,
+		}
 	}
 
-	export type SerialEventDataType<T extends SerialEvent> =
-		T extends SerialEvent.READY ? SerialEventData.Ready :
-			T extends SerialEvent.APPROVE ? SerialEventData.Approve :
-				T extends SerialEvent.REJECT ? SerialEventData.Reject :
-					never;
+	export type ServerEventDataType<T extends ServerEvent = ServerEvent> =
+		T extends ServerEvent.READY ? ServerEventData.Ready :
+			T extends ServerEvent.APPROVE ? ServerEventData.Approve :
+				T extends ServerEvent.REJECT ? ServerEventData.Reject :
+					T extends ServerEvent.USER_INFO ? ServerEventData.UserInfo :
+						never;
 }
