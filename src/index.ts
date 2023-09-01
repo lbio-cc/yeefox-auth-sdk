@@ -34,7 +34,11 @@ export class YeefoxAuthSdk{
 		this.checkDapp();
 	}
 	static get VERSION(){
-		return '1.3.1';
+		return '1.3.2';
+	}
+	
+	static dappAvailable(){
+		return typeof window.setYeefoxMessageHandler != "undefined";
 	}
 	
 	private checkDapp(){

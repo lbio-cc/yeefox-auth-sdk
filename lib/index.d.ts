@@ -12,6 +12,7 @@ export declare class YeefoxAuthSdk {
     static instance(appId?: string): YeefoxAuthSdk;
     protected constructor(appId?: string);
     static get VERSION(): string;
+    static dappAvailable(): boolean;
     private checkDapp;
     grantAssetView(options: YEEFOX_AUTH.AuthMethodData.AssetView, commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon): Promise<string>;
     grantUserInfo(options: YEEFOX_AUTH.AuthMethodData.UserInfo, commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon): Promise<string>;

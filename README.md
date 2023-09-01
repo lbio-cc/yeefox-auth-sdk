@@ -117,7 +117,22 @@ catch(e){
 
    `chain` 参数为以狐钱包链代码, 在fields中包含wallet时必填
 
+在调用DApp接口前应该先检测DApp环境是否有效
 
+```javascript
+if(yeefoxAuth.dappAvailable()){
+    ...
+}
+else{
+    console.error("未检测到DApp环境")
+}
+```
+
+
+
+
+
+调用示例代码
 
 ```javascript
 try {
