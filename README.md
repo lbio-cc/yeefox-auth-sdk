@@ -120,7 +120,7 @@ catch(e){
 在调用DApp接口前应该先检测DApp环境是否有效
 
 ```javascript
-if(yeefoxAuth.dappAvailable()){
+if(YeefoxAuthSdk.dappAvailable()){
     ...
 }
 else{
