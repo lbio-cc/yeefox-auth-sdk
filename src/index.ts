@@ -13,7 +13,8 @@ let yeefoxAuthSdkInstance: YeefoxAuthSdk|undefined;
 export class YeefoxAuthSdk{
 	public promise: WrapPromise<any> | undefined;
 	private readonly html: YeefoxAuthIframe;
-	private readonly ready: WrapPromise<string>;
+	private readonly authReady: WrapPromise<string>;
+	private readonly dappReady: WrapPromise<void>;
 	public readonly appId: string | undefined;
 	private mode: YEEFOX_AUTH.Mode;
 	private serial: number;
@@ -28,7 +29,8 @@ export class YeefoxAuthSdk{
 	protected constructor(appId?: string) {
 		this.appId = appId;
 		this.html = new YeefoxAuthIframe((message)=>this.messageHandler(message));
-		this.ready = new WrapPromise<string>();
+		this.authReady = new WrapPromise<string>();
+		this.dappReady = new WrapPromise<void>();
 		this.mode = YEEFOX_AUTH.Mode.HTML;
 		this.serial = 0;
 		this.checkDapp();
@@ -45,12 +47,12 @@ export class YeefoxAuthSdk{
 		if (typeof window.setYeefoxMessageHandler != "undefined") {
 			window.setYeefoxMessageHandler((message) => this.messageHandler(message));
 			this.mode = YEEFOX_AUTH.Mode.DAPP;
-			this.ready.resolve();
+			this.dappReady.resolve();
 		} else {
 			window.addEventListener("yeefox:ready", () => {
 				window.setYeefoxMessageHandler((message) => this.messageHandler(message));
 				this.mode = YEEFOX_AUTH.Mode.DAPP;
-				this.ready.resolve();
+				this.dappReady.resolve();
 			})
 		}
 	}
@@ -61,7 +63,7 @@ export class YeefoxAuthSdk{
 		}
 
 		await this.showFrontend();
-		await this.ready;
+		await this.authReady;
 
 		this.promise = new WrapPromise<string>();
 		this.sendMessage(YEEFOX_AUTH.AuthEvent.ASSET_VIEW, {
@@ -85,7 +87,7 @@ export class YeefoxAuthSdk{
 		}
 
 		await this.showFrontend();
-		await this.ready;
+		await this.authReady;
 		
 		this.promise = new WrapPromise<string>();
 		this.sendMessage(YEEFOX_AUTH.AuthEvent.USER_INFO, {
@@ -104,7 +106,7 @@ export class YeefoxAuthSdk{
 		}
 
 		await this.showFrontend();
-		await this.ready;
+		await this.authReady;
 
 		this.promise = new WrapPromise<string>();
 		this.sendMessage(YEEFOX_AUTH.AuthEvent.ASSET_HOSTING, {
@@ -117,11 +119,30 @@ export class YeefoxAuthSdk{
 		return this.promise as Promise<string>;
 	}
 
+	async grantAssetTransfer(options: YEEFOX_AUTH.AuthMethodData.AssetTransfer, commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon){
+		if (this.promise) {
+			throw new Error('当前有授权在进行中')
+		}
+
+		await this.showFrontend();
+		await this.authReady;
+
+		this.promise = new WrapPromise<string>();
+		this.sendMessage(YEEFOX_AUTH.AuthEvent.ASSET_TRANSFER, {
+			data: options,
+			custom: commonOption?.custom,
+			sign: commonOption?.sign,
+			appId: this.appId
+		});
+
+		return this.promise as Promise<string>;
+	}
+	
 	async getUserInfo(options: YEEFOX_AUTH.DAppMethodData.UserInfo){
 		if (this.promise) {
 			throw new Error('当前有授权在进行中')
 		}
-		await this.ready;
+		await this.dappReady;
 		this.promise = new WrapPromise();
 		this.sendMessage(YEEFOX_AUTH.DAppEvent.USER_INFO, {
 			data: options,
@@ -135,7 +156,7 @@ export class YeefoxAuthSdk{
 			case YEEFOX_AUTH.ServerEvent.READY:
 				this.sendMessage(YEEFOX_AUTH.AuthEvent.READY, { data: window.location.origin });
 				this.serial = (data as YEEFOX_AUTH.ServerEventDataType<YEEFOX_AUTH.ServerEvent.READY>).serial;
-				this.ready.resolve();
+				this.authReady.resolve();
 				break;
 			case YEEFOX_AUTH.ServerEvent.APPROVE:
 				if(this.promise){

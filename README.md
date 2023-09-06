@@ -1,5 +1,5 @@
 # @yeefox/auth-sdk
-以狐钱包授权SDK (1.3.0)
+以狐钱包授权SDK (1.4.0)
 
 ## 安装
 
@@ -85,9 +85,14 @@ import {YEEFOX_AUTH, YeefoxAuthSdk} from "@yeefox/auth-sdk";
 
    `amount`参数为数量, 在137和721时恒定为1, 1155时为需要托管的数量
 
+4. 申请授权用户资产转移接口(grantAssetTransfer)
+
+   在 接口3 的基础上, 增加了一个参数
+
+   `recipient` 作为接收者地址
 
 
-上面三个接口都会异步返回(Promise<string>)一个授权序列号, 将序列号交于后端以实际执行授权.
+上面四个接口都会异步返回(Promise<string>)一个授权序列号, 将序列号交于后端以实际执行授权.
 
 ```javascript
 try{
@@ -106,7 +111,7 @@ catch(e){
 
 ### DApp授权接口 (不需要appId)
 
-1. DApp授权用户信息
+1. DApp授权用户信息(getUserInfo)
 
    `fields`参数包含
 
@@ -116,6 +121,8 @@ catch(e){
    | WALLET             | wallet     | 链地址 |
 
    `chain` 参数为以狐钱包链代码, 在fields中包含wallet时必填
+   
+   返回结果为对象, 分别在`code`和`wallet` 键中包含用户授权的内容
 
 在调用DApp接口前应该先检测DApp环境是否有效
 
