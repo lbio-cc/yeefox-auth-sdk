@@ -22,6 +22,8 @@ export namespace YEEFOX_AUTH {
 
 	export enum DAppEvent {
 		USER_INFO = 'DAPP_USER_INFO',
+		RESOLVE_DOMAIN = "RESOLVE_DOMAIN",
+		REVERSE_RESOLVE_DOMAIN = "REVERSE_RESOLVE_DOMAIN",
 	}
 
 	export namespace AuthMethodData {
@@ -33,6 +35,8 @@ export namespace YEEFOX_AUTH {
 
 		export interface AssetView {
 			chains?: string[],
+			walletType?: '0x' | 'iaa',
+			wallets?: string[],
 		}
 
 		export interface AssetHosting {
@@ -53,6 +57,24 @@ export namespace YEEFOX_AUTH {
 			fields: Exclude<UserInfoField, UserInfoField.PHONE>[],
 			chain?: string,
 			walletType?: '0x' | 'iaa'
+		}
+
+		export type ResolveDomain = {
+			chain: string,
+			domain: string,
+		} & ({
+			type: "address",
+			key: 1000 | 1001 | 1002,
+			value: string,
+		} | {
+			type: "text",
+			key: string,
+			value: string,
+		})
+
+		export interface ReverseResolveDomain {
+			domain: string,
+			address: string,
 		}
 	}
 
@@ -86,11 +108,32 @@ export namespace YEEFOX_AUTH {
 		export interface AssetTransfer extends Common {
 			data: AuthMethodData.AssetTransfer
 		}
+
+		export interface Sign extends Common {
+			data: Object,
+		}
 	}
 
 	export namespace DAppEventData {
-		export interface UserInfo {
-			data: DAppMethodData.UserInfo
+		export interface UserCommon {
+			custom?: string,
+			sign?: string,
+		}
+		export interface Common extends UserCommon {
+			appId?: string,
+			data: any,
+		}
+		
+		export interface UserInfo extends Common{
+			data: DAppMethodData.UserInfo,
+		}
+
+		export interface ResolveDomain extends Common {
+			data: DAppMethodData.ResolveDomain,
+		}
+
+		export interface ReverseResolveDomain extends Common {
+			data: DAppMethodData.ReverseResolveDomain,
 		}
 	}
 
@@ -100,17 +143,27 @@ export namespace YEEFOX_AUTH {
 				T extends AuthEvent.ASSET_VIEW ? AuthEventData.AssetView :
 					T extends AuthEvent.ASSET_HOSTING ? AuthEventData.AssetHosting :
 						T extends AuthEvent.ASSET_TRANSFER ? AuthEventData.AssetTransfer :
-							never;
+							T extends AuthEvent.SIGN ? AuthEventData.Sign :
+								never;
 
 	export type DAppEventDataType<T extends DAppEvent = DAppEvent> =
 		T extends DAppEvent.USER_INFO ? DAppEventData.UserInfo :
-			never;
+			T extends DAppEvent.RESOLVE_DOMAIN ? DAppEventData.ResolveDomain :
+				T extends DAppEvent.REVERSE_RESOLVE_DOMAIN ? DAppEventData.ReverseResolveDomain :
+					never;
+
+	export type EventDataType<T extends AuthEvent | DAppEvent = AuthEvent | DAppEvent> =
+		T extends AuthEvent ? AuthEventDataType<T> :
+			T extends DAppEvent ? DAppEventDataType<T> :
+				never;
 
 	export enum ServerEvent {
 		READY = 'READY',
 		APPROVE = 'APPROVE',
 		REJECT = 'REJECT',
-		USER_INFO = 'USER_INFO',
+		USER_INFO = 'R_USER_INFO',
+		RESOLVE_DOMAIN = 'R_RESOLVE_DOMAIN',
+		REVERSE_RESOLVE_DOMAIN = 'R_REVERSE_RESOLVE_DOMAIN'
 	}
 
 	export namespace ServerEventData {
@@ -125,10 +178,15 @@ export namespace YEEFOX_AUTH {
 		export interface Reject {
 			reason?: string,
 		}
-		
+
 		export interface UserInfo {
-			code?:string,
-			wallet?:string,
+			code?: string,
+			wallet?: string,
+		}
+
+		export interface Execute {
+			success: boolean,
+			message: string,
 		}
 	}
 
@@ -137,5 +195,7 @@ export namespace YEEFOX_AUTH {
 			T extends ServerEvent.APPROVE ? ServerEventData.Approve :
 				T extends ServerEvent.REJECT ? ServerEventData.Reject :
 					T extends ServerEvent.USER_INFO ? ServerEventData.UserInfo :
-						never;
+						T extends ServerEvent.RESOLVE_DOMAIN ? ServerEventData.Execute :
+							T extends ServerEvent.REVERSE_RESOLVE_DOMAIN ? ServerEventData.Execute :
+								never;
 }

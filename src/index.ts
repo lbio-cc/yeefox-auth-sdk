@@ -43,6 +43,17 @@ export class YeefoxAuthSdk{
 		return typeof window.setYeefoxMessageHandler != "undefined";
 	}
 	
+	get ready(){
+		if(this.mode === YEEFOX_AUTH.Mode.DAPP){
+			return this.dappReady;
+		}
+		else{
+			this.showFrontend();
+			return this.authReady;
+		}
+	}
+	
+	
 	private checkDapp(){
 		if (typeof window.setYeefoxMessageHandler != "undefined") {
 			window.setYeefoxMessageHandler((message) => this.messageHandler(message));
@@ -62,8 +73,7 @@ export class YeefoxAuthSdk{
 			throw new Error('当前有授权在进行中')
 		}
 
-		await this.showFrontend();
-		await this.authReady;
+		await this.ready;
 
 		this.promise = new WrapPromise<string>();
 		this.sendMessage(YEEFOX_AUTH.AuthEvent.ASSET_VIEW, {
@@ -86,8 +96,7 @@ export class YeefoxAuthSdk{
 			throw new Error('当前有授权在进行中')
 		}
 
-		await this.showFrontend();
-		await this.authReady;
+		await this.ready;
 		
 		this.promise = new WrapPromise<string>();
 		this.sendMessage(YEEFOX_AUTH.AuthEvent.USER_INFO, {
@@ -105,8 +114,7 @@ export class YeefoxAuthSdk{
 			throw new Error('当前有授权在进行中')
 		}
 
-		await this.showFrontend();
-		await this.authReady;
+		await this.ready;
 
 		this.promise = new WrapPromise<string>();
 		this.sendMessage(YEEFOX_AUTH.AuthEvent.ASSET_HOSTING, {
@@ -123,9 +131,8 @@ export class YeefoxAuthSdk{
 		if (this.promise) {
 			throw new Error('当前有授权在进行中')
 		}
-
-		await this.showFrontend();
-		await this.authReady;
+		
+		await this.ready;
 
 		this.promise = new WrapPromise<string>();
 		this.sendMessage(YEEFOX_AUTH.AuthEvent.ASSET_TRANSFER, {
@@ -138,17 +145,52 @@ export class YeefoxAuthSdk{
 		return this.promise as Promise<string>;
 	}
 	
-	async getUserInfo(options: YEEFOX_AUTH.DAppMethodData.UserInfo){
+	async getUserInfo(options: YEEFOX_AUTH.DAppMethodData.UserInfo, commonOption?: YEEFOX_AUTH.DAppEventData.UserCommon){
 		if (this.promise) {
 			throw new Error('当前有授权在进行中')
 		}
-		await this.dappReady;
+		await this.ready;
 		this.promise = new WrapPromise();
 		this.sendMessage(YEEFOX_AUTH.DAppEvent.USER_INFO, {
 			data: options,
+			custom: commonOption?.custom,
+			sign: commonOption?.sign,
+			appId: this.appId
 		});
 
 		return this.promise as Promise<YEEFOX_AUTH.ServerEventDataType<YEEFOX_AUTH.ServerEvent.USER_INFO>>;
+	}
+	
+	async resolveDomain(options: YEEFOX_AUTH.DAppMethodData.ResolveDomain, commonOption?: YEEFOX_AUTH.DAppEventData.UserCommon){
+		if (this.promise) {
+			throw new Error('当前有授权在进行中')
+		}
+		await this.ready;
+		this.promise = new WrapPromise();
+		this.sendMessage(YEEFOX_AUTH.DAppEvent.RESOLVE_DOMAIN, {
+			data: options,
+			custom: commonOption?.custom,
+			sign: commonOption?.sign,
+			appId: this.appId
+		});
+
+		return this.promise as Promise<YEEFOX_AUTH.ServerEventDataType<YEEFOX_AUTH.ServerEvent.RESOLVE_DOMAIN>>;
+	}
+	
+	async reverseResolveDomain(options: YEEFOX_AUTH.DAppMethodData.ReverseResolveDomain, commonOption?: YEEFOX_AUTH.DAppEventData.UserCommon){
+		if (this.promise) {
+			throw new Error('当前有授权在进行中')
+		}
+		await this.ready;
+		this.promise = new WrapPromise();
+		this.sendMessage(YEEFOX_AUTH.DAppEvent.REVERSE_RESOLVE_DOMAIN, {
+			data: options,
+			custom: commonOption?.custom,
+			sign: commonOption?.sign,
+			appId: this.appId
+		});
+
+		return this.promise as Promise<YEEFOX_AUTH.ServerEventDataType<YEEFOX_AUTH.ServerEvent.RESOLVE_DOMAIN>>;
 	}
 	
 	private eventHandler<T extends YEEFOX_AUTH.ServerEvent>(eventType: T, data: YEEFOX_AUTH.ServerEventDataType<T> ){
@@ -173,16 +215,22 @@ export class YeefoxAuthSdk{
 				}
 				break;
 			case YEEFOX_AUTH.ServerEvent.USER_INFO:
+			case YEEFOX_AUTH.ServerEvent.RESOLVE_DOMAIN:
+			case YEEFOX_AUTH.ServerEvent.REVERSE_RESOLVE_DOMAIN:
 				if (this.promise) {
 					this.promise.resolve(data);
 					this.promise = undefined;
+					this.html.hide();
 				}
+				break;
+			default:
+				console.warn(`event ${eventType} not implemented`);
 		}
 	}
 
-	private async showFrontend(){
+	private showFrontend(){
 		if (this.mode === YEEFOX_AUTH.Mode.HTML) {
-			await this.html.show();
+			this.html.show();
 		}
 	}
 	
@@ -233,7 +281,7 @@ class YeefoxAuthIframe{
 		document.body.appendChild(this.container);
 	}
 	
-	async show(){
+	show(){
 		if(!this.visited){
 			window.addEventListener('message', (e)=>this.messageHandler(e))
 			this.iframe.src = `${YEEFOX_ORIGIN}/#/pages/auth/iframe`;

@@ -14,12 +14,15 @@ export declare class YeefoxAuthSdk {
     protected constructor(appId?: string);
     static get VERSION(): string;
     static dappAvailable(): boolean;
+    get ready(): WrapPromise<string> | WrapPromise<void>;
     private checkDapp;
     grantAssetView(options: YEEFOX_AUTH.AuthMethodData.AssetView, commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon): Promise<string>;
     grantUserInfo(options: YEEFOX_AUTH.AuthMethodData.UserInfo, commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon): Promise<string>;
     grantAssetHosting(options: YEEFOX_AUTH.AuthMethodData.AssetHosting, commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon): Promise<string>;
     grantAssetTransfer(options: YEEFOX_AUTH.AuthMethodData.AssetTransfer, commonOption?: YEEFOX_AUTH.AuthEventData.UserCommon): Promise<string>;
-    getUserInfo(options: YEEFOX_AUTH.DAppMethodData.UserInfo): Promise<YEEFOX_AUTH.ServerEventData.UserInfo>;
+    getUserInfo(options: YEEFOX_AUTH.DAppMethodData.UserInfo, commonOption?: YEEFOX_AUTH.DAppEventData.UserCommon): Promise<YEEFOX_AUTH.ServerEventData.UserInfo>;
+    resolveDomain(options: YEEFOX_AUTH.DAppMethodData.ResolveDomain, commonOption?: YEEFOX_AUTH.DAppEventData.UserCommon): Promise<YEEFOX_AUTH.ServerEventData.Execute>;
+    reverseResolveDomain(options: YEEFOX_AUTH.DAppMethodData.ReverseResolveDomain, commonOption?: YEEFOX_AUTH.DAppEventData.UserCommon): Promise<YEEFOX_AUTH.ServerEventData.Execute>;
     private eventHandler;
     private showFrontend;
     messageHandler(e: MessageEvent): void;
